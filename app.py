@@ -13,5 +13,5 @@ st.plotly_chart(fig)
 st.write('Enter welcome to streamlit deploy example')
 txt = st.text_input(label='Enter something here')
 st.write(txt)
-
+#https://carpentries-incubator.github.io/python-interactive-data-visualizations/08-publish-your-app/index.html
 #pip3 freeze > requirements.txt
