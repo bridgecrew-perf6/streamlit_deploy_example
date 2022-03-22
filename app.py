@@ -1,8 +1,14 @@
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
-df = pd.read_csv('Data/NVDA.csv')
-print(df.head(10))
+
+st.write("data_series_path:", st.secrets["data_series"])
+
+#df = pd.read_csv('Data/NVDA.csv')
+url = st.secrets["data_series"]
+url='https://drive.google.com/uc?id=' + url.split('/')[-2]
+df = pd.read_csv(url)
+st.write(df.head(10))
 
 fig = go.Figure(data=[go.Candlestick(x=df['Date'],
                 open=df['Open'],
