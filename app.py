@@ -13,3 +13,5 @@ st.plotly_chart(fig)
 st.write('Enter welcome to streamlit deploy example')
 txt = st.text_input(label='Enter something here')
 st.write(txt)
+
+#pip3 freeze > requirements.txt
