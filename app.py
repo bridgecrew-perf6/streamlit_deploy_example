@@ -2,8 +2,8 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-st.write("data_series_path:", st.secrets["data_series"])
-
+#st.write("data_series_path:", st.secrets["data_series"])
+st.write("loading from secret")
 #df = pd.read_csv('Data/NVDA.csv')
 url = st.secrets["data_series"]
 url='https://drive.google.com/uc?id=' + url.split('/')[-2]
