@@ -17,39 +17,27 @@ conn = connect()
 # Uses st.cache to only rerun when the query changes or after 10 min.
 #@st.cache(ttl=600,
 #https://discuss.streamlit.io/t/secrets-management-unhashable-in-st-cache/15409
-#@st.cache(ttl=600,allow_output_mutation=True,suppress_st_warning=True,hash_funcs={"_thread.RLock": lambda _: None, pd.DataFrame: lambda _: None
-#def run_query(query):
-#    rows = conn.execute(query, headers=1)
-#    return rows
-
-#sheet_url = st.secrets["public_gsheets_url"]
-#sheet_url = st.secrets["data_series"]
-#rows = run_query(f'SELECT * FROM "{sheet_url}"')
 
 import requests
 
-
-
-#url ='https://drive.google.com/uc?id=' + st.secrets["data_series"].split('/')[-2]
-#df = pd.read_csv(url)
-#st.write(df.head(10))
-@st.cache(ttl=6000)
+SINAL_POINTER_FILE = "signal_pointer_file.csv"
+DOWNLOADED_DATA_DIR = "./Downloaded_data"
+SIGNAL_POINTER_FILE_ID = st.secrets['signal_pointer_fileid']
+#@st.cache(ttl=6000)
+@st.cache(ttl=600,allow_output_mutation=True,suppress_st_warning=True,hash_funcs={"_thread.RLock": lambda _: None, pd.DataFrame: lambda _: None})
 def load_data():
-    from upload2gdrive import download_file_from_google_drive
-    from pathlib import Path
-    downloaded_data_dir = "./Downloaded_data"
-    p = Path(downloaded_data_dir)
-    p.mkdir(exist_ok=True)
-    destination= downloaded_data_dir+"/meow.csv"
-    id="1tOMgTtlmke7CeCzfnX8LpWCLxK16DqS4"
-    # make sure your link is set to EDIT
-    download_file_from_google_drive(id, destination)
 
+    from gdrive_download_utils import download_signal_pointer_file, download_all_signals
+    download_signal_pointer_file(SIGNAL_POINTER_FILE_ID, SINAL_POINTER_FILE)
+    download_all_signals(SINAL_POINTER_FILE, DOWNLOADED_DATA_DIR)
 
-    df = pd.read_csv(destination)
-    return df
+    import pandas as pd
+    nvda_df = pd.read_csv(DOWNLOADED_DATA_DIR+'/NVDA.csv')
+    return nvda_df
+
 
 df = load_data()
+
 fig = go.Figure(data=[go.Candlestick(x=df['Date'],
                 open=df['Open'],
                 high=df['High'],
