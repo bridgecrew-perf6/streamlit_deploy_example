@@ -26,13 +26,13 @@ SIGNAL_POINTER_FILE_ID = st.secrets['signal_pointer_fileid']
 #@st.cache(ttl=6000)
 @st.cache(ttl=600,allow_output_mutation=True,suppress_st_warning=True,hash_funcs={"_thread.RLock": lambda _: None, pd.DataFrame: lambda _: None})
 def load_data():
+    import pandas as pd
 
     from gdrive_download_utils import download_signal_pointer_file, download_all_signals
     download_signal_pointer_file(SIGNAL_POINTER_FILE_ID, SINAL_POINTER_FILE)
     download_all_signals(SINAL_POINTER_FILE, DOWNLOADED_DATA_DIR)
 
-    import pandas as pd
-    nvda_df = pd.read_csv(DOWNLOADED_DATA_DIR+'/NFLX.csv')
+    nvda_df = pd.read_csv(DOWNLOADED_DATA_DIR +'/NFLX.csv')
     return nvda_df
 
 
