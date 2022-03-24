@@ -64,10 +64,10 @@ def download_all_signals(signal_pointer_file, downloaded_data_dir = "./Downloade
 
     for idx, row in signal_pointer_df.iterrows():
         # we assume the target is csv but this should change depending on the original file type accordingly
-        destination = os.path.join(p,row.factor+'.csv')
+        destination = os.path.join(p,row.signal+'.csv')
         id = row.file_id
         download_file_from_google_drive_sharables(id, destination)
-        print(row.factor, row.file_id)
+        print(row.signal, row.file_id)
     pass
 
 

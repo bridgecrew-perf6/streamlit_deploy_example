@@ -32,7 +32,7 @@ def load_data():
     download_all_signals(SINAL_POINTER_FILE, DOWNLOADED_DATA_DIR)
 
     import pandas as pd
-    nvda_df = pd.read_csv(DOWNLOADED_DATA_DIR+'/NVDA.csv')
+    nvda_df = pd.read_csv(DOWNLOADED_DATA_DIR+'/NFLX.csv')
     return nvda_df
 
 
