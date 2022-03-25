@@ -36,11 +36,17 @@ def download_file_from_google_drive_sharables(id, destination):
     Agile Bean
     May 16, 2020 at 13:43
 
+    #note: thomas added r to convert string literals
+
     :param id:
     :param destination:
     :return:
     '''
     URL = "https://drive.google.com/uc?" + id
+    #URL = "https://drive.google.com/uc?" + id
+    #URL ="https://drive.google.com/file/d/"+id
+
+    print(URL)
     session = requests.Session()
 
     response = session.get(URL, params = { 'id' : id }, stream = True)
@@ -53,23 +59,29 @@ def download_file_from_google_drive_sharables(id, destination):
     save_response_content(response, destination)
 
 
-def download_all_signals(signal_pointer_file, downloaded_data_dir = "./Downloaded_data"):
+def download_all_signals(signal_pointer_file, downloaded_data_dir):
     import os
     import pandas as pd
     from pathlib import Path
 
-    signal_pointer_df = pd.read_csv(signal_pointer_file)
-    p = Path(downloaded_data_dir)
-    p.mkdir(exist_ok=True)
+    try:
+        signal_pointer_df = pd.read_csv(signal_pointer_file)
+        if signal_pointer_df.empty:
+            raise pd.errors.EmptyDataError
 
-    for idx, row in signal_pointer_df.iterrows():
-        # we assume the target is csv but this should change depending on the original file type accordingly
-        destination = os.path.join(p,row.signal+'.csv')
-        id = row.file_id
-        download_file_from_google_drive_sharables(id, destination)
-        print(row.signal, row.file_id)
-    pass
+        p = Path(downloaded_data_dir)
+        p.mkdir(exist_ok=True)
 
+        for idx, row in signal_pointer_df.iterrows():
+            # we assume the target is csv but this should change depending on the original file type accordingly
+            destination = os.path.join(p,row.signal+'.csv')
+            id = row.file_id
+            download_file_from_google_drive_sharables(id, destination)
+            print(row.signal, row.file_id)
+
+    except Exception as e:
+        print(e)
+        pass
 
 def download_signal_pointer_file(id, destination):
     import streamlit as st
@@ -79,8 +91,9 @@ def download_signal_pointer_file(id, destination):
     return destination
 
 
-if __name__ == "__main__":
-    SINAL_POINTER_FILE = "signal_pointer_file.csv"
-    DOWNLOADED_DATA_DIR = "./Downloaded_data"
-    download_signal_pointer_file()
-    download_all_signals(SINAL_POINTER_FILE,DOWNLOADED_DATA_DIR)
+if __name__ == "____":
+    #SINAL_POINTER_FILE = "signal_pointer_file.csv"
+    #raws =r"1VA-QE48-5S1GABReSsNZ1fyR1nKsqKSB"
+    raws='1VA-QE48-5S1GABReSsNZ1fyR1nKsqKSB'
+    download_signal_pointer_file(raws,'xyz2.csv')
+    #download_all_signals(SINAL_POINTER_FILE,DOWNLOADED_DATA_DIR)

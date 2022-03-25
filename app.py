@@ -20,22 +20,25 @@ conn = connect()
 
 import requests
 
-SINAL_POINTER_FILE = "signal_pointer_file.csv"
+SIGNAL_POINTER_FILE = "signal_pointer_file.csv"
 DOWNLOADED_DATA_DIR = "./Downloaded_data"
 SIGNAL_POINTER_FILE_ID = st.secrets['signal_pointer_fileid']
-#@st.cache(ttl=6000)
-@st.cache(ttl=600,allow_output_mutation=True,suppress_st_warning=True,hash_funcs={"_thread.RLock": lambda _: None, pd.DataFrame: lambda _: None})
+
+@st.cache(ttl=600,allow_output_mutation=True,suppress_st_warning=True,hash_funcs={"_thread.RLock": lambda _: None})
+def download_all_data():
+    print('RUNNING DOWNLOAD ALL DATA')
+    from gdrive_download_utils import download_signal_pointer_file, download_all_signals
+    download_signal_pointer_file(SIGNAL_POINTER_FILE_ID, SIGNAL_POINTER_FILE)
+    download_all_signals(SIGNAL_POINTER_FILE, DOWNLOADED_DATA_DIR)
+    pass
+
+@st.cache(ttl=600,allow_output_mutation=True,suppress_st_warning=True,hash_funcs={"_thread.RLock": lambda _: None})
 def load_data():
     import pandas as pd
-
-    from gdrive_download_utils import download_signal_pointer_file, download_all_signals
-    download_signal_pointer_file(SIGNAL_POINTER_FILE_ID, SINAL_POINTER_FILE)
-    download_all_signals(SINAL_POINTER_FILE, DOWNLOADED_DATA_DIR)
-
     nvda_df = pd.read_csv(DOWNLOADED_DATA_DIR +'/NFLX.csv')
     return nvda_df
 
-
+download_all_data()
 df = load_data()
 
 fig = go.Figure(data=[go.Candlestick(x=df['Date'],

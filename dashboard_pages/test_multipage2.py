@@ -8,4 +8,4 @@ def strdate2date(str_date):
     return datetime.datetime.strptime(str_date,'%Y-%m-%d').date()
 
 def app():
-    st.write('hello world')
+    st.write('hello world PAGE2')
