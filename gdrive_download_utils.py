@@ -62,6 +62,7 @@ def download_file_from_google_drive_sharables(id, destination):
 def download_all_signals(signal_pointer_file, downloaded_data_dir):
     import os
     import pandas as pd
+    import streamlit as st
     from pathlib import Path
 
     try:
@@ -74,10 +75,11 @@ def download_all_signals(signal_pointer_file, downloaded_data_dir):
 
         for idx, row in signal_pointer_df.iterrows():
             # we assume the target is csv but this should change depending on the original file type accordingly
-            destination = os.path.join(p,row.signal+'.csv')
+            destination = os.path.join(p,row.signal+'.'+row.file_ext)
             id = row.file_id
             download_file_from_google_drive_sharables(id, destination)
             print(row.signal, row.file_id)
+            st.info("download_all_signals:: SIGNAL=" +row.signal+ " DOWNLAODED.")
 
     except Exception as e:
         print(e)
