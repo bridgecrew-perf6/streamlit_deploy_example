@@ -134,3 +134,4 @@ widgetsnbextension==3.6.0
 wincertstore==0.2
 xgboost==1.1.1
 zipp==3.7.0
+dotted-dict==1.1.3
