@@ -69,15 +69,11 @@ download_all_data_new()
 if "vcpable_universe" not in st.session_state:
     from utils.load_universe_info import get_vcpable_universe
     st.session_state.vcpable_universe = get_vcpable_universe()
-    st.info(st.session_state)
-
+    #st.info(st.session_state)
     #print(st.session_state.vcpable_universe)
 
 ##########################################
 ##########################################
-
-
-
 
 def strink_sidebar():
     #https://github.com/streamlit/streamlit/issues/2058
