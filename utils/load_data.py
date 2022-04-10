@@ -1,9 +1,75 @@
 import streamlit as st
 
-
 @st.cache(ttl=600,allow_output_mutation=True,suppress_st_warning=True,hash_funcs={"_thread.RLock": lambda _: None})
 def load_time_series_data(ticker):
     import pandas as pd
     from streamlit_project_settings import DOWNLOADED_DATA_DIR
     ts_df = pd.read_csv(DOWNLOADED_DATA_DIR +'/'+ ticker.upper() +'.csv')
     return ts_df
+
+@st.cache(ttl=36000,allow_output_mutation=True,suppress_st_warning=True,hash_funcs={"_thread.RLock": lambda _: None})
+def load_time_series_data_refintiv(ticker):
+    print('load_time_series_data_refintiv:: runnnig '+ ticker)
+    import pandas as pd
+    from streamlit_project_settings import OHLCV_PICKLE
+    ts_df = pd.read_pickle(OHLCV_PICKLE)
+    ticker_specific_df = convert_single_equity_2_df(ts_df, ticker)
+    ticker_specific_df.reset_index(inplace=True)
+    return ticker_specific_df
+
+
+@st.cache(ttl=600,allow_output_mutation=True,suppress_st_warning=True,hash_funcs={"_thread.RLock": lambda _: None})
+def load_static_data(ticker):
+    import pandas as pd
+    #from streamlit_project_settings import DOWNLOADED_DATA_DIR
+    #static_data = pd.read_csv(DOWNLOADED_DATA_DIR +'/'+ ticker.upper() +'.csv')
+
+    static_data = pd.DataFrame({"ISIN": "US1729674242",
+                                   "COMMONNAME": "Citigroup Inc",
+                                   "GICSINDUSGROUP": "Banks",
+                                   "GICSSECTOR": "Financials",
+                                   "IPODATE": "1986-10-30",
+                                "DESCRIPTION": "Apple Inc. designs, manufactures and markets smartphones, personal computers, tablets, wearables and accessories, and sells a variety of related services. The Company's products include iPhone, Mac, iPad, and Wearables, Home and Accessories. iPhone is the Company''s line of smartphones based on its iOS operating system."}, index=[0])
+    return static_data
+
+
+def convert_single_equity_2_df(ohlcv_btg_format, symbol):
+    import logging
+    try:
+        import pandas as pd
+        '''
+        # this functioon converts a single symbol from ohlc_btg_format (dotted dict) to ohlcv for backtrader
+
+                                  open        high         low       close        volume
+        date                                                                    
+        2007-01-03    3.081786    3.092143    2.925000    2.992857  1.238320e+09
+        2007-01-04    3.001786    3.069643    2.993572    3.059286  8.472604e+08
+        2007-01-05    3.063214    3.078571    3.014286    3.037500  8.347416e+08
+        2007-01-08    3.070000    3.090357    3.045714    3.052500  7.971068e+08
+        '''
+
+        single_equity_df = pd.DataFrame(
+            [ohlcv_btg_format.open[symbol], ohlcv_btg_format.high[symbol], ohlcv_btg_format.low[symbol],
+             ohlcv_btg_format.close[symbol], ohlcv_btg_format.volume[symbol]]).T
+
+        single_equity_df.columns = ['open', 'high', 'low', 'close', 'volume']
+        return single_equity_df
+
+    except Exception as e:
+
+        logging.error('convert_single_equity:: error in converting ohlcv_btg_format to dataframe')
+        logging.error('convert_single_equity')
+        logging.error(str(e))
+
+        return pd.DataFrame()
+
+
+@st.cache(ttl=36000,allow_output_mutation=True,suppress_st_warning=True,hash_funcs={"_thread.RLock": lambda _: None})
+def load_vcp_df():
+    print('load_vcp_df:: running ')
+    import pandas as pd
+    import os
+    from streamlit_project_settings import VCP_DF_PATH
+    #abs_path = os.path.join(r"C:\Users\tclyu\PycharmProjects\exodus\hardcore_vcp","HARDCORE_VCP_2009-10-01.csv")
+    vcp_df = pd.read_csv(VCP_DF_PATH)
+    return vcp_df
