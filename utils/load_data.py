@@ -68,8 +68,30 @@ def convert_single_equity_2_df(ohlcv_btg_format, symbol):
 def load_vcp_df():
     print('load_vcp_df:: running ')
     import pandas as pd
-    import os
     from streamlit_project_settings import VCP_DF_PATH
-    #abs_path = os.path.join(r"C:\Users\tclyu\PycharmProjects\exodus\hardcore_vcp","HARDCORE_VCP_2009-10-01.csv")
     vcp_df = pd.read_csv(VCP_DF_PATH)
     return vcp_df
+
+@st.cache(ttl=36000,allow_output_mutation=True,suppress_st_warning=True,hash_funcs={"_thread.RLock": lambda _: None})
+def load_RSSCORE_df():
+    print('load_RSSCORE_df:: running ')
+    import pandas as pd
+    from streamlit_project_settings import RSSCORE_DF_PATH
+    rs_score_df = pd.read_csv(RSSCORE_DF_PATH,parse_dates=True,index_col='date')
+    return rs_score_df
+
+@st.cache(ttl=36000,allow_output_mutation=True,suppress_st_warning=True,hash_funcs={"_thread.RLock": lambda _: None})
+def load_MRSQUARE_df():
+    print('load_MRSQUARE_df:: running ')
+    import pandas as pd
+    from streamlit_project_settings import MRSQUARE_DF_PATH
+    mrsquare_score_df = pd.read_csv(MRSQUARE_DF_PATH, parse_dates=True,index_col='date')
+    return mrsquare_score_df
+
+@st.cache(ttl=36000,allow_output_mutation=True,suppress_st_warning=True,hash_funcs={"_thread.RLock": lambda _: None})
+def load_SCTRSCORE_df():
+    print('load_SCTRSCORE_df:: running ')
+    import pandas as pd
+    from streamlit_project_settings import SCTRSCORE_DF_PATH
+    sctr_score_df = pd.read_csv(SCTRSCORE_DF_PATH,parse_dates=True,index_col='date')
+    return sctr_score_df

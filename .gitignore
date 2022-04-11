@@ -1,1 +1,11 @@
 /.streamlit/secrets.toml
+
+Downloaded_data/
+
+netflix_titles
+
+netflix_titles.csv
+
+signal_pointer_file.csv
+
+SIGNAL_POINTER_LIVE.csv

@@ -12,7 +12,7 @@ def select_ticker():
         maxtags = 1,
         )
     if len(keywords) > 0:
-        if keywords[0] in st.session_state.ticker_universe:
+        if keywords[0].upper() in st.session_state.ticker_universe:
             st.write(keywords[0])
             ticker = keywords[0].upper()
         else:
