@@ -3,10 +3,7 @@ import streamlit as st
 def set_up_time_series_plot(ticker, ohlcv_df):
     from plotly.subplots import make_subplots
     import plotly.graph_objects as go
-    #import matplotlib.pyplot as plt
     import plotly.io as pio
-    #plt.rcParams['figure.figsize'] = [12, 7]
-    #plt.rc('font', size=14)
 
     pio.templates.default = "plotly_dark"
 
@@ -40,27 +37,38 @@ def set_up_time_series_plot(ticker, ohlcv_df):
 def add_contraction_lines(fig, merged_contractions):
     # plot horizontal lines for contraction
     import datetime
+
+    horizontal_line_length = 10
+    line_width = 2
+    line_colour = "blue"
+    text_colour = line_colour
     for idx, con_ in merged_contractions.iterrows():
         constraction_start_dt = datetime.datetime.strptime(con_.start_dt_index, '%Y-%m-%d')
         constraction_end_dt = datetime.datetime.strptime(con_.end_dt_index, '%Y-%m-%d')
 
-        resis_date_on_plot_line_start_index = constraction_start_dt - datetime.timedelta(days=2)
-        resis_date_on_plot_line_end_index = constraction_start_dt + datetime.timedelta(days=2)
+
+        resis_date_on_plot_line_start_index = constraction_start_dt - datetime.timedelta(days=horizontal_line_length)
+        resis_date_on_plot_line_end_index = constraction_start_dt + datetime.timedelta(days=horizontal_line_length)
 
         fig.add_shape(type='line', x0=resis_date_on_plot_line_start_index,
-                      x1=resis_date_on_plot_line_end_index, y0=con_.resis_price, y1=con_.resis_price)
+                      x1=resis_date_on_plot_line_end_index, y0=con_.resis_price, y1=con_.resis_price,
+                      line_width=line_width, line_color=line_colour)
 
         delta_t_days = (constraction_end_dt - constraction_start_dt).days
         fig.add_annotation(x=resis_date_on_plot_line_start_index, y=con_.resis_price,
                            text=str(round(con_.contraction_pct * 100, 2)) + '%,' + str(delta_t_days), showarrow=True,
-                           arrowhead=1)
+                           arrowhead=1,font=dict(
+        #family="sans serif",
+        #size=25,
+        color=text_colour
+        ))
 
-        support_date_on_plot_line_start_index = constraction_end_dt - datetime.timedelta(days=2)
-        support_date_on_plot_line_end_index = constraction_end_dt + datetime.timedelta(days=2)
+        support_date_on_plot_line_start_index = constraction_end_dt - datetime.timedelta(days=horizontal_line_length)
+        support_date_on_plot_line_end_index = constraction_end_dt + datetime.timedelta(days=horizontal_line_length)
 
         fig.add_shape(type='line', x0=support_date_on_plot_line_start_index,
                       x1=support_date_on_plot_line_end_index, y0=con_.support_price,
-                      y1=con_.support_price)
+                      y1=con_.support_price, line_width=line_width, line_color=line_colour)
     return fig
 
 def clean_up_axis(fig, ticker, date_str):
@@ -116,7 +124,7 @@ def NEW_generate_VCP_plot_for_timeslice(ticker, ohlcv_df, vcp_slice):
     data_end_date = datetime.datetime.strptime(current_scan_date, '%Y-%m-%d')
     subset_ohlcv_df = ohlcv_df_tmp[ohlcv_df_tmp['date'] <= data_end_date]
 
-    fig = set_up_time_series_plot(ticker,subset_ohlcv_df)
+    fig = set_up_time_series_plot(ticker, subset_ohlcv_df)
 
     merged_contractions = get_contractions_from_vcp_df(vcp_slice)
     if not merged_contractions.empty:
@@ -157,7 +165,9 @@ def display_vcp_supp_data(vcp_slice):
     vcp_supp_data = {}
     vcp_slice_dict = vcp_slice.to_dict(orient='records')[0]
     vcp_supp_data['MM Basic Filtered'] = vcp_slice_dict['MM_Stage2Filtered']
-    vcp_supp_data['Relative Strength'] = vcp_slice_dict['rs_score']
+    vcp_supp_data['Relative Strength'] = vcp_slice_dict['RSSCORE']
+    vcp_supp_data['SCTR'] = vcp_slice_dict['SCTRSCORE']
+    vcp_supp_data['MRSQUARE'] = vcp_slice_dict['MRSQUARE']
     vcp_supp_data['Stage 2'] = vcp_slice_dict['SW_stage2']
     vcp_supp_data = pd.Series(data=vcp_supp_data).to_frame()
     vcp_supp_data.columns = ["Supplementary Data"]
@@ -232,7 +242,10 @@ def make_pertty_vcp_summary(vcp_df):
     vcp_df_pretty['SW stage2'] = vcp_df['SW_stage2'].astype('str')
     vcp_df_pretty['MM Stage2Filtered'] = vcp_df['MM_Stage2Filtered'].astype('str')
     vcp_df_pretty['Volume contraction'] = vcp_df['volume_contraction_condition'].astype('str')
-    vcp_df_pretty['Relative Strength Score'] = round(vcp_df['rs_score'],0)
+    vcp_df_pretty['Relative Strength Score'] = round(vcp_df['RSSCORE'],0)
+    vcp_df_pretty['SCTR Score'] = round(vcp_df['RSSCORE'],0)
+    vcp_df_pretty['MSQUARE Score'] = round(vcp_df['MRSQUARE'],0)
+
     return vcp_df_pretty
 
 # we want filter vcp to make sense before VCPs before displaying
@@ -241,7 +254,7 @@ def in_house_filter_vcp_df(vcp_df):
     inhouse_filtered_vcp_df = inhouse_filtered_vcp_df[(inhouse_filtered_vcp_df['total_duration']>30) &\
         (inhouse_filtered_vcp_df['first_contraction_pct'] >=0.2) & (inhouse_filtered_vcp_df['first_contraction_pct'] <= 0.45)  &\
     (inhouse_filtered_vcp_df['latest_contraction_pct'] <= 0.15) &\
-    (inhouse_filtered_vcp_df['rs_score'] >= 60) &\
+    (inhouse_filtered_vcp_df['RSSCORE'] >= 60) &\
     (inhouse_filtered_vcp_df['SW_stage2']==True) & \
     (inhouse_filtered_vcp_df['volume_contraction_condition']) & (inhouse_filtered_vcp_df['latest_contraction_price'] >= 10)]
 
@@ -286,10 +299,7 @@ def app():
     from utils.load_data import load_time_series_data_refintiv, load_vcp_df
     vcp_df = load_vcp_df()
     vcp_df_pretty = prepare_vcp_df(vcp_df)
-    #vcp_df = load_vcp_df()
-    #inhouse_filtered_vcp_df = in_house_filter_vcp_df(vcp_df)
-    #print('*********************',inhouse_filtered_vcp_df.shape,vcp_df.shape)
-    #vcp_df_pretty = make_pertty_vcp_summary(inhouse_filtered_vcp_df)
+
     data, default_ticker = build_vcp_summary_table(vcp_df_pretty)
 
     if not data['selected_rows']:
@@ -306,9 +316,14 @@ def app():
     fig, near_field = NEW_generate_VCP_plot_for_timeslice(ticker, ohlcv_df, vcp_slice)
     fig.update_layout(width=1200, height=900)
     st.plotly_chart(fig, width=1200, height=900)
-    #st.plotly_chart(fig)
 
+    # show VCP metrics
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Relative Strength", round(vcp_slice['RSSCORE'],2))
+    col2.metric("SCTR", round(vcp_slice["SCTRSCORE"],2))
+    col3.metric("Stock on the move", round(vcp_slice["MRSQUARE"],2))
 
+    st.write('---')
     st.write("## VCP pattern recognition")
     display_vcp_identity(vcp_slice, current_scan_date_str)
     display_vcp_supp_data(vcp_slice)

@@ -1,7 +1,4 @@
-import os
 import streamlit as st
-import numpy as np
-from PIL import  Image
 
 # Custom imports
 from multipage import MultiPage
@@ -72,6 +69,9 @@ if "vcpable_universe" not in st.session_state:
     #st.info(st.session_state)
     #print(st.session_state.vcpable_universe)
 
+if "ticker_universe" not in st.session_state:
+    from utils.load_universe_info import get_time_series_data_refintiv_universe
+    st.session_state.ticker_universe = get_time_series_data_refintiv_universe()
 ##########################################
 ##########################################
 
@@ -97,8 +97,12 @@ def strink_sidebar():
 
 #Add all your application here
 # from dashboard_pages import test_multipage, test_multipage2, test_multipage3, factor_explorer, vcp_page, test_timeseries
-from dashboard_pages import vcp_page
-app.add_page("Daily VCP scanner",vcp_page.app)
+from deploy_pages import askgod, vcp_page
+
+app.add_page("Momentum lookup",askgod.app)
+app.add_page("VCP setup", vcp_page.app)
+
+#app.add_page("Daily VCP scanner",vcp_page.app)
 #app.add_page("page1",test_multipage.app)
 #app.add_page("Ask god",test_multipage2.app)
 #app.add_page("Factor",factor_explorer.app)
@@ -106,13 +110,10 @@ app.add_page("Daily VCP scanner",vcp_page.app)
 
 # The main app
 app.run()
-from streamlit_project_settings import DOWNLOADED_DATA_DIR, SIGNAL_POINTER_FILE_ID, SIGNAL_POINTER_FILE
-from gdrive_download_utils import download_all_signals, download_file_from_google_drive_sharables
 
 #download_file_from_google_drive_sharables("1wqQdJe7JCTg9xoh9yaYCtI8XJGmENs42", "TIMESERIES.pkl")
 
 #download_file_from_google_drive_sharables(r'1I8mC11owGeO51A-dUG55HPuM7WQvj_eZ', 'netflix_titles')
-import pandas as pd
 #import pickle
 #file_to_read = open("TIMESERIES.pkl", "rb")
 #loaded_object = pickle.load(file_to_read)
