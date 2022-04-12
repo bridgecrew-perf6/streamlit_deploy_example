@@ -80,7 +80,7 @@ def clean_up_axis(fig, ticker, date_str):
         autosize=False,
         width=1000,
         height=600,
-        margin=dict(l=0, r=20, t=30, b=20),
+        margin=dict(l=2, r=20, t=30, b=20),
         title_text=generate_title
     )
     fig.update_xaxes(showgrid=True, gridwidth=0.01, gridcolor='Black', automargin=False)
@@ -245,6 +245,10 @@ def make_pertty_vcp_summary(vcp_df):
     vcp_df_pretty['Relative Strength Score'] = round(vcp_df['RSSCORE'],0)
     vcp_df_pretty['SCTR Score'] = round(vcp_df['RSSCORE'],0)
     vcp_df_pretty['MSQUARE Score'] = round(vcp_df['MRSQUARE'],0)
+    vcp_df_pretty['support_mrsquare'] = round(vcp_df['support_mrsquare'],0)
+    vcp_df_pretty['support_slope'] = round(vcp_df['support_slope'],0)
+    vcp_df_pretty['resis_mrsquare'] = round(vcp_df['resis_mrsquare'],0)
+    vcp_df_pretty['resis_slope'] = round(vcp_df['resis_slope'],0)
 
     return vcp_df_pretty
 
@@ -252,7 +256,7 @@ def make_pertty_vcp_summary(vcp_df):
 def in_house_filter_vcp_df(vcp_df):
     inhouse_filtered_vcp_df = vcp_df.copy(deep=True)
     inhouse_filtered_vcp_df = inhouse_filtered_vcp_df[(inhouse_filtered_vcp_df['total_duration']>30) &\
-        (inhouse_filtered_vcp_df['first_contraction_pct'] >=0.2) & (inhouse_filtered_vcp_df['first_contraction_pct'] <= 0.45)  &\
+        (inhouse_filtered_vcp_df['first_contraction_pct'] >= 0.2) & (inhouse_filtered_vcp_df['first_contraction_pct'] <= 0.45)  &\
     (inhouse_filtered_vcp_df['latest_contraction_pct'] <= 0.15) &\
     (inhouse_filtered_vcp_df['RSSCORE'] >= 60) &\
     (inhouse_filtered_vcp_df['SW_stage2']==True) & \
