@@ -1,4 +1,5 @@
 import streamlit as st
+import datetime
 
 @st.cache(ttl=600,allow_output_mutation=True,suppress_st_warning=True,hash_funcs={"_thread.RLock": lambda _: None})
 def load_time_series_data(ticker):
@@ -65,7 +66,7 @@ def convert_single_equity_2_df(ohlcv_btg_format, symbol):
 
 
 @st.cache(ttl=36000,allow_output_mutation=True,suppress_st_warning=True,hash_funcs={"_thread.RLock": lambda _: None})
-def load_vcp_df():
+def load_vcp_df(snapshot_date = datetime.datetime.now().date()):
     print('load_vcp_df:: running ')
     import pandas as pd
     from streamlit_project_settings import VCP_DF_PATH
@@ -73,25 +74,26 @@ def load_vcp_df():
     return vcp_df
 
 @st.cache(ttl=36000,allow_output_mutation=True,suppress_st_warning=True,hash_funcs={"_thread.RLock": lambda _: None})
-def load_RSSCORE_df():
+def load_RSSCORE_df(snapshot_date = datetime.datetime.now().date()):
     print('load_RSSCORE_df:: running ')
     import pandas as pd
     from streamlit_project_settings import RSSCORE_DF_PATH
     rs_score_df = pd.read_csv(RSSCORE_DF_PATH,parse_dates=True,index_col='date')
-    return rs_score_df
+    rs_score_df_df5 = rs_score_df.diff(periods=5)
+    return rs_score_df, rs_score_df_df5, rs_score_df.diff(periods=10)
 
 @st.cache(ttl=36000,allow_output_mutation=True,suppress_st_warning=True,hash_funcs={"_thread.RLock": lambda _: None})
-def load_MRSQUARE_df():
+def load_MRSQUARE_df(snapshot_date = datetime.datetime.now().date()):
     print('load_MRSQUARE_df:: running ')
     import pandas as pd
     from streamlit_project_settings import MRSQUARE_DF_PATH
     mrsquare_score_df = pd.read_csv(MRSQUARE_DF_PATH, parse_dates=True,index_col='date')
-    return mrsquare_score_df
+    return mrsquare_score_df,  mrsquare_score_df.diff(periods=5), mrsquare_score_df.diff(periods=10)
 
 @st.cache(ttl=36000,allow_output_mutation=True,suppress_st_warning=True,hash_funcs={"_thread.RLock": lambda _: None})
-def load_SCTRSCORE_df():
+def load_SCTRSCORE_df(snapshot_date = datetime.datetime.now().date()):
     print('load_SCTRSCORE_df:: running ')
     import pandas as pd
     from streamlit_project_settings import SCTRSCORE_DF_PATH
     sctr_score_df = pd.read_csv(SCTRSCORE_DF_PATH,parse_dates=True,index_col='date')
-    return sctr_score_df
+    return sctr_score_df, sctr_score_df.diff(periods=5), sctr_score_df.diff(periods=10)

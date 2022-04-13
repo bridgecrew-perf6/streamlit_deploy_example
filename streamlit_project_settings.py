@@ -9,7 +9,7 @@ if not OVERRIDE_SECRET:
 # below are files that are downloaded to local (locally @ streamlit instance)
 SIGNAL_POINTER_FILE = "SIGNAL_POINTER_LIVE.csv"
 OHLCV_PICKLE = os.path.join(DOWNLOADED_DATA_DIR,'OHLCVDICT.pickle')
-VCP_DF_PATH = os.path.join(DOWNLOADED_DATA_DIR,'HARDCOREVCP.csv')
+VCP_DF_PATH = os.path.join(DOWNLOADED_DATA_DIR,'LIVEVCP.csv')
 RSSCORE_DF_PATH = os.path.join(DOWNLOADED_DATA_DIR,'RSSCORE.csv')
 SCTRSCORE_DF_PATH = os.path.abspath(os.path.join(DOWNLOADED_DATA_DIR,'SCTRSCORE.csv'))
 MRSQUARE_DF_PATH = os.path.join(DOWNLOADED_DATA_DIR,'MRSQUARE.csv')

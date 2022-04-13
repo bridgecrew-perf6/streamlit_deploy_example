@@ -1,4 +1,6 @@
 import requests
+import streamlit as st
+import datetime
 # this set of tools downlaod file without using google drive api
 #https://discuss.streamlit.io/t/how-to-download-large-model-files-to-the-sharing-app/7160
 def get_confirm_token(response):
@@ -29,6 +31,7 @@ def download_file_from_google_drive(id, destination):
 
     save_response_content(response, destination)
 
+
 def download_file_from_google_drive_sharables(id, destination):
     # https://stackoverflow.com/questions/38511444/python-download-files-from-google-drive-using-url
     '''
@@ -46,7 +49,7 @@ def download_file_from_google_drive_sharables(id, destination):
     #URL = "https://drive.google.com/uc?" + id
     #URL ="https://drive.google.com/file/d/"+id
 
-    print(URL)
+    print("download_file_from_google_drive_sharables:: URL=",URL)
     session = requests.Session()
 
     response = session.get(URL, params = { 'id' : id }, stream = True)
@@ -58,7 +61,7 @@ def download_file_from_google_drive_sharables(id, destination):
 
     save_response_content(response, destination)
 
-
+@st.cache(ttl=36000,allow_output_mutation=True,suppress_st_warning=True,hash_funcs={"_thread.RLock": lambda _: None})
 def download_all_signals(signal_pointer_file, downloaded_data_dir):
     import os
     import pandas as pd
@@ -85,7 +88,9 @@ def download_all_signals(signal_pointer_file, downloaded_data_dir):
         print(e)
         pass
 
-def download_signal_pointer_file(id, destination):
+import datetime
+@st.cache(ttl=36000,allow_output_mutation=True,suppress_st_warning=True,hash_funcs={"_thread.RLock": lambda _: None})
+def download_signal_pointer_file(id, destination,snapshot_date = datetime.datetime.now().date()):
     import streamlit as st
     #id = st.secrets['signal_pointer_fileid']
     # make sure your link is set to EDIT

@@ -42,15 +42,16 @@ def download_all_data():
         st.exception(e)
         return False
 
-@st.cache(ttl=3600,allow_output_mutation=True,suppress_st_warning=True,hash_funcs={"_thread.RLock": lambda _: None})
-def download_all_data_new():
+import datetime
+@st.cache(ttl=36000,allow_output_mutation=True,suppress_st_warning=True,hash_funcs={"_thread.RLock": lambda _: None})
+def download_all_data_new(snapshot_date = datetime.datetime.now().date()):
     try:
+
         from streamlit_project_settings import DOWNLOADED_DATA_DIR, SIGNAL_POINTER_FILE_ID, SIGNAL_POINTER_FILE
         from gdrive_download_utils import download_all_signals, download_file_from_google_drive_sharables
+        print('running download all data')
         st.info('running download all data')
         st.info('download signal pointer file')
-        #SIGNAL_POINTER_FILE_ID = st.secrets['signal_pointer_fileid']
-        #SIGNAL_POINTER_FILE = "signal_pointer_file.csv"  # this is the downloaded file (locally @ streamlit instance)
         download_file_from_google_drive_sharables(SIGNAL_POINTER_FILE_ID, SIGNAL_POINTER_FILE)
         download_all_signals(SIGNAL_POINTER_FILE, DOWNLOADED_DATA_DIR)
 

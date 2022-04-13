@@ -229,26 +229,29 @@ def display_stat_data(static_data_df):
     st.table(vcp_identity.astype(str))
     pass
 
+# this determines what colums are shown in the VCP summary table
 def make_pertty_vcp_summary(vcp_df):
     import pandas as pd
     vcp_df_pretty = pd.DataFrame()
     vcp_df_pretty['ticker'] = vcp_df['ticker']
     vcp_df_pretty['scanned date'] = vcp_df['datetime']
+    vcp_df_pretty['first detected date'] = vcp_df['earliest_vcp_scanned_date']
+    vcp_df_pretty['VCP footprint'] = (vcp_df['total_duration'].fillna(0)/ 5).round().astype(str) + "W-" + vcp_df['contraction_ratio'].round(2).astype(str)+ '-'+vcp_df['number_of_consolidations'].astype(str) + 'T'
     vcp_df_pretty['total duration (days)'] = vcp_df['total_duration'].astype('int32')
-    vcp_df_pretty['First contraction (%)'] = round(vcp_df['first_contraction_pct'].astype('float')*100,1)
-    vcp_df_pretty['First contraction_duration (days)'] = vcp_df['first_contraction_duration'].astype('int32')
+    vcp_df_pretty['1st contraction (%)'] = round(vcp_df['first_contraction_pct'].astype('float')*100,1)
+    vcp_df_pretty['1st contraction (days)'] = vcp_df['first_contraction_duration'].astype('int32')
     vcp_df_pretty['Latest contraction (%)'] = round(vcp_df['latest_contraction_pct'].astype('float')*100,1)
-    vcp_df_pretty['latest contraction duration (days)'] = vcp_df['latest_contraction_duration'].astype('int32')
+    vcp_df_pretty['latest contraction (days)'] = vcp_df['latest_contraction_duration'].astype('int32')
     vcp_df_pretty['SW stage2'] = vcp_df['SW_stage2'].astype('str')
-    vcp_df_pretty['MM Stage2Filtered'] = vcp_df['MM_Stage2Filtered'].astype('str')
+    vcp_df_pretty['MM Trend filtered'] = vcp_df['MM_Stage2Filtered'].astype('str')
     vcp_df_pretty['Volume contraction'] = vcp_df['volume_contraction_condition'].astype('str')
-    vcp_df_pretty['Relative Strength Score'] = round(vcp_df['RSSCORE'],0)
-    vcp_df_pretty['SCTR Score'] = round(vcp_df['RSSCORE'],0)
-    vcp_df_pretty['MSQUARE Score'] = round(vcp_df['MRSQUARE'],0)
-    vcp_df_pretty['support_mrsquare'] = round(vcp_df['support_mrsquare'],0)
-    vcp_df_pretty['support_slope'] = round(vcp_df['support_slope'],0)
-    vcp_df_pretty['resis_mrsquare'] = round(vcp_df['resis_mrsquare'],0)
-    vcp_df_pretty['resis_slope'] = round(vcp_df['resis_slope'],0)
+    vcp_df_pretty['RS'] = round(vcp_df['RSSCORE'],0)
+    vcp_df_pretty['SCTR'] = round(vcp_df['RSSCORE'],0)
+    vcp_df_pretty['MSQUARE'] = round(vcp_df['MRSQUARE'],0)
+    vcp_df_pretty['support_mrsquare'] = vcp_df['support_mrsquare']
+    #vcp_df_pretty['support_slope'] = vcp_df['support_slope']
+    vcp_df_pretty['resis_mrsquare'] =vcp_df['resis_mrsquare']
+    #vcp_df_pretty['resis_slope'] = vcp_df['resis_slope']
 
     return vcp_df_pretty
 
@@ -265,7 +268,8 @@ def in_house_filter_vcp_df(vcp_df):
     inhouse_filtered_vcp_df.reset_index(inplace=True)
     return inhouse_filtered_vcp_df
 
-def build_vcp_summary_table(vcp_df_pretty):
+
+def make_summary_table(vcp_df_pretty):
     from st_aggrid import AgGrid
     from st_aggrid.shared import GridUpdateMode
     from st_aggrid.grid_options_builder import GridOptionsBuilder
@@ -273,18 +277,25 @@ def build_vcp_summary_table(vcp_df_pretty):
     gb = GridOptionsBuilder.from_dataframe(vcp_df_pretty)
     gb.configure_pagination()
     gb.configure_side_bar()
-    gb.configure_default_column(groupable=True, value=True, enableRowGroup=True, aggFunc="sum", editable=True,min_column_width=100)
+    gb.configure_default_column(groupable=True, value=True, enableRowGroup=True, aggFunc="sum", editable=True,
+                                min_column_width=100)
     gb.configure_selection(selection_mode="single", use_checkbox=True)
     gridOptions = gb.build()
+
     selected_data = AgGrid(vcp_df_pretty,
                            width='1000',
-                           #theme='dark',
-                fit_columns_on_grid_load=True,
-                  gridOptions=gridOptions,
-                  enable_enterprise_modules=True,
-                  allow_unsafe_jscode=True,
-                  update_mode=GridUpdateMode.SELECTION_CHANGED)
+                           height=1000,
+                           # theme='dark',
+                           fit_columns_on_grid_load=True,
+                           gridOptions=gridOptions,
+                           enable_enterprise_modules=True,
+                           allow_unsafe_jscode=True,
+                           update_mode=GridUpdateMode.SELECTION_CHANGED)
     default_ticker = vcp_df_pretty['ticker'][0]
+    return selected_data, default_ticker
+
+def build_vcp_summary_table(vcp_df_pretty):
+    selected_data, default_ticker = make_summary_table(vcp_df_pretty)
     return selected_data, default_ticker
 
 @st.cache(ttl=36000,allow_output_mutation=True,suppress_st_warning=True,hash_funcs={"_thread.RLock": lambda _: None})
@@ -302,6 +313,7 @@ def app():
     import streamlit as st
     from utils.load_data import load_time_series_data_refintiv, load_vcp_df
     vcp_df = load_vcp_df()
+    #st.dataframe(vcp_df)
     vcp_df_pretty = prepare_vcp_df(vcp_df)
 
     data, default_ticker = build_vcp_summary_table(vcp_df_pretty)
@@ -337,27 +349,12 @@ def app():
 
 
 
-
-
-
 if __name__ == "__main__":
     import os
     import pandas as pd
-    abs_path = os.path.join(r"C:\Users\tclyu\PycharmProjects\exodus\hardcore_vcp","HARDCORE_VCP_2009-10-01.csv")
-    vcp_df = pd.read_csv(abs_path)
+    vcp_df = pd.read_csv(r"C:\Users\tclyu\PycharmProjects\streamlit_deploy_example\Downloaded_data\LIVEVCP.csv")
 
-    #df.astype('int32').dtypes
-    vcp_df_pretty = pd.DataFrame()
-    vcp_df_pretty['ticker'] = vcp_df['ticker']
-    vcp_df_pretty['scanned date'] = vcp_df['datetime']
-    vcp_df_pretty['total duration (days)'] = vcp_df['total_duration'].astype('int32')
-    vcp_df_pretty['First contraction (%)'] = round(vcp_df['first_contraction_pct'].astype('float')*100,1)
-    vcp_df_pretty['First contraction_duration (days)'] = vcp_df['first_contraction_duration'].astype('int32')
-    vcp_df_pretty['Latest contraction (%)'] = round(vcp_df['latest_contraction_pct'].astype('float')*100,1)
-    vcp_df_pretty['latest contraction duration (days)'] = vcp_df['latest_contraction_duration'].astype('int32')
-    vcp_df_pretty['SW stage2'] = vcp_df['SW_stage2'].astype('str')
-    vcp_df_pretty['MM Stage2Filtered'] = vcp_df['MM_Stage2Filtered'].astype('str')
-    vcp_df_pretty['Volume contraction'] = vcp_df['volume_contraction_condition']
-    vcp_df_pretty['Relative Strength Score'] =  round(vcp_df['rs_score'],0)
-    print('here')
-
+    #x = round(vcp_df['total_duration'] / 5) + " W " + vcp_df[
+    #    'contraction_ratio'].astype(str) + ' ' + vcp_df['number_of_contraction'].astype(str) + 'T'
+    x = (vcp_df['total_duration'].fillna(0)/ 5).round().astype(str) + "W-" + vcp_df['contraction_ratio'].round(2).astype(str)+ '-'+vcp_df['number_of_consolidations'].astype(str) + 'T'
+    print(x)

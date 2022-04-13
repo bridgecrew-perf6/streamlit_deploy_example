@@ -27,9 +27,9 @@ def app():
     import streamlit as st
     from utils.load_data import load_time_series_data_refintiv, load_SCTRSCORE_df, load_RSSCORE_df, load_MRSQUARE_df
 
-    rs_score_df = load_RSSCORE_df()
-    sctr_score_df = load_SCTRSCORE_df()
-    mrsquare_score_df = load_MRSQUARE_df()
+    rs_score_df, rs_score_df_d5, rs_score_df_d10 = load_RSSCORE_df()
+    sctr_score_df, sctr_score_df_d5, sctr_score_df_d10 = load_SCTRSCORE_df()
+    mrsquare_score_df, mrsquare_score_df_d5, mrsquare_score_df_d10= load_MRSQUARE_df()
 
     ticker = select_ticker()
     df = load_time_series_data_refintiv(ticker)
@@ -60,6 +60,12 @@ def app():
     selected_date_time_stamp = pd.to_datetime(dt)
     st.write("As of: "+ str(selected_date_time_stamp.date()))
 
-    col1.metric("Relative Strength", round(rs_score_df.loc[selected_date_time_stamp][ticker],2))
-    col2.metric("SCTR", round(sctr_score_df.loc[selected_date_time_stamp][ticker],2))
-    col3.metric("Stock on the move", round(mrsquare_score_df.loc[selected_date_time_stamp][ticker],2))
+    id_selected_date_time_stamp = rs_score_df.index.get_indexer([selected_date_time_stamp],method='nearest')
+
+    delta_rs_d5 = str(round(rs_score_df_d5.iloc[id_selected_date_time_stamp][ticker].values[0],2))
+    delta_sctr_d5 = str(round(sctr_score_df.iloc[id_selected_date_time_stamp][ticker].values[0],2))
+    delta_mrsquare_d5 = str(round(mrsquare_score_df.iloc[id_selected_date_time_stamp][ticker].values[0],2))
+
+    col1.metric("Relative Strength", round(rs_score_df.iloc[id_selected_date_time_stamp][ticker],2), delta=delta_rs_d5)
+    col2.metric("SCTR", round(sctr_score_df.iloc[id_selected_date_time_stamp][ticker],2), delta=delta_sctr_d5)
+    col3.metric("Stock on the move", round(mrsquare_score_df.iloc[id_selected_date_time_stamp][ticker],2), delta=delta_mrsquare_d5)
