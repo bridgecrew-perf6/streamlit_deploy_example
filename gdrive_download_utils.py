@@ -45,10 +45,10 @@ def download_file_from_google_drive_sharables(id, destination):
     :param destination:
     :return:
     '''
-    URL = "https://drive.google.com/uc?" + id
     #URL = "https://drive.google.com/uc?" + id
+    URL = "https://drive.google.com/uc?" + str(id)
     #URL ="https://drive.google.com/file/d/"+id
-
+    #URL  =r"https://drive.google.com/uc?/1VA-QE48-5S1GABReSsNZ1fyR1nKsqKSB"
     print("download_file_from_google_drive_sharables:: URL=",URL)
     session = requests.Session()
 
@@ -59,7 +59,10 @@ def download_file_from_google_drive_sharables(id, destination):
         params = { 'id' : id, 'confirm' : token }
         response = session.get(URL, params = params, stream = True)
 
-    save_response_content(response, destination)
+    if response.status_code == 200:
+        save_response_content(response, destination)
+    else:
+        print("ERROR download_file_from_google_drive_sharables:: ", response.status_code)
 
 @st.cache(ttl=36000,allow_output_mutation=True,suppress_st_warning=True,hash_funcs={"_thread.RLock": lambda _: None})
 def download_all_signals(signal_pointer_file, downloaded_data_dir):
@@ -67,6 +70,7 @@ def download_all_signals(signal_pointer_file, downloaded_data_dir):
     import pandas as pd
     import streamlit as st
     from pathlib import Path
+    import time
 
     try:
         signal_pointer_df = pd.read_csv(signal_pointer_file)
@@ -83,6 +87,9 @@ def download_all_signals(signal_pointer_file, downloaded_data_dir):
             download_file_from_google_drive_sharables(id, destination)
             print(row.signal, row.file_id)
             st.info("download_all_signals:: SIGNAL=" +row.signal+ " DOWNLAODED.")
+
+            # sleep to avoid error in downloading
+            time.sleep(5)
 
     except Exception as e:
         print(e)

@@ -21,6 +21,7 @@ def get_vcp_data_universe():
 
 
 def get_vcpable_universe():
+    print('get_vcpable_universe:: running ')
     # finds the interaction between VCP and ticker universe
     time_series_universe = get_time_series_data_refintiv_universe()
     vcp_tickers_universe = get_vcp_data_universe()

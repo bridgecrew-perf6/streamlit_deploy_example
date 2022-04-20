@@ -52,6 +52,8 @@ def download_all_data_new(snapshot_date = datetime.datetime.now().date()):
         print('running download all data')
         st.info('running download all data')
         st.info('download signal pointer file')
+        st.info(SIGNAL_POINTER_FILE_ID)
+        st.info(SIGNAL_POINTER_FILE)
         download_file_from_google_drive_sharables(SIGNAL_POINTER_FILE_ID, SIGNAL_POINTER_FILE)
         download_all_signals(SIGNAL_POINTER_FILE, DOWNLOADED_DATA_DIR)
 
@@ -63,7 +65,14 @@ def download_all_data_new(snapshot_date = datetime.datetime.now().date()):
         return False
 
 
-download_all_data_new()
+# from gdrive_download_utils import download_all_signals, download_file_from_google_drive_sharables
+# from streamlit_project_settings import DOWNLOADED_DATA_DIR, SIGNAL_POINTER_FILE_ID, SIGNAL_POINTER_FILE
+# download_file_from_google_drive_sharables(SIGNAL_POINTER_FILE_ID, SIGNAL_POINTER_FILE)
+# exit()
+print(download_all_data_new())
+from utils.load_data import prepare_fullframe_vcp_data
+prepare_fullframe_vcp_data()
+
 if "vcpable_universe" not in st.session_state:
     from utils.load_universe_info import get_vcpable_universe
     st.session_state.vcpable_universe = get_vcpable_universe()
@@ -98,10 +107,12 @@ def strink_sidebar():
 
 #Add all your application here
 # from dashboard_pages import test_multipage, test_multipage2, test_multipage3, factor_explorer, vcp_page, test_timeseries
-from deploy_pages import askgod, vcp_page
+#from deploy_pages import askgod, vcp_page, askgod_stockbasis
+from deploy_pages import  askgod_stockbasis ,new_vcp_page, recent_breakout
 
-app.add_page("Momentum lookup",askgod.app)
-app.add_page("VCP setup", vcp_page.app)
+app.add_page("Recent breakout", recent_breakout.app)
+app.add_page("Momentum lookup",askgod_stockbasis.app)
+app.add_page("VCP setup", new_vcp_page.app)
 
 #app.add_page("Daily VCP scanner",vcp_page.app)
 #app.add_page("page1",test_multipage.app)

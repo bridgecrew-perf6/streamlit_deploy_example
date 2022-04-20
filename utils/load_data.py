@@ -19,21 +19,6 @@ def load_time_series_data_refintiv(ticker):
     return ticker_specific_df
 
 
-@st.cache(ttl=600,allow_output_mutation=True,suppress_st_warning=True,hash_funcs={"_thread.RLock": lambda _: None})
-def load_static_data(ticker):
-    import pandas as pd
-    #from streamlit_project_settings import DOWNLOADED_DATA_DIR
-    #static_data = pd.read_csv(DOWNLOADED_DATA_DIR +'/'+ ticker.upper() +'.csv')
-
-    static_data = pd.DataFrame({"ISIN": "US1729674242",
-                                   "COMMONNAME": "Citigroup Inc",
-                                   "GICSINDUSGROUP": "Banks",
-                                   "GICSSECTOR": "Financials",
-                                   "IPODATE": "1986-10-30",
-                                "DESCRIPTION": "Apple Inc. designs, manufactures and markets smartphones, personal computers, tablets, wearables and accessories, and sells a variety of related services. The Company's products include iPhone, Mac, iPad, and Wearables, Home and Accessories. iPhone is the Company''s line of smartphones based on its iOS operating system."}, index=[0])
-    return static_data
-
-
 def convert_single_equity_2_df(ohlcv_btg_format, symbol):
     import logging
     try:
@@ -71,8 +56,11 @@ def load_vcp_df(snapshot_date = datetime.datetime.now().date()):
     import pandas as pd
     from streamlit_project_settings import VCP_DF_PATH
     vcp_df = pd.read_csv(VCP_DF_PATH)
+    vcp_df = vcp_df.drop(['RSSCORE', 'SCTRSCORE', 'MRSQUARE'], axis=1, errors='ignore')
+
     return vcp_df
 
+"""
 @st.cache(ttl=36000,allow_output_mutation=True,suppress_st_warning=True,hash_funcs={"_thread.RLock": lambda _: None})
 def load_RSSCORE_df(snapshot_date = datetime.datetime.now().date()):
     print('load_RSSCORE_df:: running ')
@@ -97,3 +85,23 @@ def load_SCTRSCORE_df(snapshot_date = datetime.datetime.now().date()):
     from streamlit_project_settings import SCTRSCORE_DF_PATH
     sctr_score_df = pd.read_csv(SCTRSCORE_DF_PATH,parse_dates=True,index_col='date')
     return sctr_score_df, sctr_score_df.diff(periods=5), sctr_score_df.diff(periods=10)
+"""
+
+
+@st.cache(ttl=36000,allow_output_mutation=True,suppress_st_warning=True,hash_funcs={"_thread.RLock": lambda _: None})
+def load_STOCKBASIS(snapshot_date = datetime.datetime.now().date()):
+    print('load_SCTRSCORE_df:: running ')
+    import pandas as pd
+    from streamlit_project_settings import STOCKBASIS_DF_PATH
+    stockbasis_df = pd.read_csv(STOCKBASIS_DF_PATH,index_col=[0])
+    return stockbasis_df
+
+import datetime
+@st.cache(ttl=36000,allow_output_mutation=True,suppress_st_warning=True,hash_funcs={"_thread.RLock": lambda _: None})
+def prepare_fullframe_vcp_data():
+    print('prepare_fullframe_vcp_data:: running ')
+    from utils.load_data import load_vcp_df, load_STOCKBASIS
+    vcp_df = load_vcp_df()
+    stockbasis_df = load_STOCKBASIS()
+    vcp_df_full = vcp_df.join(stockbasis_df,on=['ticker'],how='inner')
+    return vcp_df_full

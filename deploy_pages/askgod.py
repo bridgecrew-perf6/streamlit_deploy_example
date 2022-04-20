@@ -69,3 +69,22 @@ def app():
     col1.metric("Relative Strength", round(rs_score_df.iloc[id_selected_date_time_stamp][ticker],2), delta=delta_rs_d5)
     col2.metric("SCTR", round(sctr_score_df.iloc[id_selected_date_time_stamp][ticker],2), delta=delta_sctr_d5)
     col3.metric("Stock on the move", round(mrsquare_score_df.iloc[id_selected_date_time_stamp][ticker],2), delta=delta_mrsquare_d5)
+
+    import plotly.express as px
+    import plotly.io as pio
+    st.markdown("# Factor time series")
+
+    factors_2_plot = pd.concat({"relative strength score":rs_score_df[ticker],"sctr":sctr_score_df[ticker], "MrSquare":mrsquare_score_df[ticker]},axis=1)
+    fig = px.line(factors_2_plot, title='Factors')
+    fig.update_layout(
+        autosize=False,
+        width=1000,
+        height=600,
+        margin=dict(l=20, r=20, t=30, b=20),
+    )
+    fig.update_xaxes(showgrid=True, gridwidth=0.01, gridcolor='Black', automargin=False)
+    fig.update_yaxes(showgrid=True, gridwidth=0.01, gridcolor='Black', automargin=False)
+    fig.update(layout_xaxis_rangeslider_visible=True)
+
+    pio.templates.default = "plotly_dark"
+    st.plotly_chart(fig)

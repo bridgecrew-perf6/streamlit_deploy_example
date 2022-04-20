@@ -71,17 +71,26 @@ def add_contraction_lines(fig, merged_contractions):
                       y1=con_.support_price, line_width=line_width, line_color=line_colour)
     return fig
 
-def clean_up_axis(fig, ticker, date_str):
-    generate_title = "TICKER=" + ticker + ",DATE=" + date_str  # + ",volume_slope=" + str(
+def clean_up_axis(fig, ticker, date_str,use_title=True):
+    if use_title:
+        generate_title = "TICKER=" + ticker + ",DATE=" + date_str  # + ",volume_slope=" + str(
+    else:
+        generate_title=""
     # https://plotly.com/python/time-series/#hiding-weekends-and-holidays
     fig.update_xaxes(rangebreaks=[dict(bounds=["sat", "mon"]), ])  # hide weekends
     fig.update_layout(title_text=generate_title)
     fig.update_layout(
-        autosize=False,
+        autosize=True,
         width=1000,
         height=600,
-        margin=dict(l=2, r=20, t=30, b=20),
-        title_text=generate_title
+        margin=dict(l=20, r=50, t=30, b=20),
+        title_text=generate_title,
+        legend=dict(
+    yanchor="top",
+    y=0.99,
+    xanchor="left",
+    x=0.01
+    )
     )
     fig.update_xaxes(showgrid=True, gridwidth=0.01, gridcolor='Black', automargin=False)
     fig.update_yaxes(showgrid=True, gridwidth=0.01, gridcolor='Black', automargin=False)
@@ -236,7 +245,10 @@ def make_pertty_vcp_summary(vcp_df):
     vcp_df_pretty['ticker'] = vcp_df['ticker']
     vcp_df_pretty['scanned date'] = vcp_df['datetime']
     vcp_df_pretty['first detected date'] = vcp_df['earliest_vcp_scanned_date']
-    vcp_df_pretty['VCP footprint'] = (vcp_df['total_duration'].fillna(0)/ 5).round().astype(str) + "W-" + vcp_df['contraction_ratio'].round(2).astype(str)+ '-'+vcp_df['number_of_consolidations'].astype(str) + 'T'
+    # this is the VCP footprint that MM uses
+    vcp_df_pretty['footprint'] = (vcp_df['total_duration'].fillna(0)/ 5).round().astype(str) + "W-" +\
+                                 vcp_df['contraction_ratio'].round(2).astype(str)+ '-'+vcp_df['number_of_consolidations'].astype(str) + 'T'
+
     vcp_df_pretty['total duration (days)'] = vcp_df['total_duration'].astype('int32')
     vcp_df_pretty['1st contraction (%)'] = round(vcp_df['first_contraction_pct'].astype('float')*100,1)
     vcp_df_pretty['1st contraction (days)'] = vcp_df['first_contraction_duration'].astype('int32')
@@ -248,9 +260,11 @@ def make_pertty_vcp_summary(vcp_df):
     vcp_df_pretty['RS'] = round(vcp_df['RSSCORE'],0)
     vcp_df_pretty['SCTR'] = round(vcp_df['RSSCORE'],0)
     vcp_df_pretty['MSQUARE'] = round(vcp_df['MRSQUARE'],0)
-    vcp_df_pretty['support_mrsquare'] = vcp_df['support_mrsquare']
+    vcp_df_pretty['is_break_out_latest_contraction'] = vcp_df['is_break_out_latest_contraction'].astype('str')
+    vcp_df_pretty['is_break_out_first_contraction'] = vcp_df['is_break_out_first_contraction'].astype('str')
+    #vcp_df_pretty['support_mrsquare'] = vcp_df['support_mrsquare']
     #vcp_df_pretty['support_slope'] = vcp_df['support_slope']
-    vcp_df_pretty['resis_mrsquare'] =vcp_df['resis_mrsquare']
+    #vcp_df_pretty['resis_mrsquare'] =vcp_df['resis_mrsquare']
     #vcp_df_pretty['resis_slope'] = vcp_df['resis_slope']
 
     return vcp_df_pretty
@@ -258,13 +272,14 @@ def make_pertty_vcp_summary(vcp_df):
 # we want filter vcp to make sense before VCPs before displaying
 def in_house_filter_vcp_df(vcp_df):
     inhouse_filtered_vcp_df = vcp_df.copy(deep=True)
+    """
     inhouse_filtered_vcp_df = inhouse_filtered_vcp_df[(inhouse_filtered_vcp_df['total_duration']>30) &\
         (inhouse_filtered_vcp_df['first_contraction_pct'] >= 0.2) & (inhouse_filtered_vcp_df['first_contraction_pct'] <= 0.45)  &\
     (inhouse_filtered_vcp_df['latest_contraction_pct'] <= 0.15) &\
     (inhouse_filtered_vcp_df['RSSCORE'] >= 60) &\
     (inhouse_filtered_vcp_df['SW_stage2']==True) & \
     (inhouse_filtered_vcp_df['volume_contraction_condition']) & (inhouse_filtered_vcp_df['latest_contraction_price'] >= 10)]
-
+    """
     inhouse_filtered_vcp_df.reset_index(inplace=True)
     return inhouse_filtered_vcp_df
 
