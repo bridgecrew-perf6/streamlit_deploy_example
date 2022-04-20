@@ -103,7 +103,7 @@ def app():
     with col1:
         fig, near_field = NEW_generate_VCP_plot_for_timeslice(ticker, ohlcv_df, vcp_slice)
 
-        from deploy_pages.vcp_page import clean_up_axis
+        from utils.vcp_plottings import clean_up_axis
         fig, clean_up_axis(fig, ticker,str(vcp_slice_dict['datetime']))
         st.plotly_chart(fig, width=1200, height=900)
 

@@ -114,6 +114,7 @@ def get_contractions_from_vcp_df(vcp_slice):
         print(e)
         return pd.DataFrame()
 
+
 def NEW_generate_VCP_plot_for_timeslice(ticker, ohlcv_df, vcp_slice):
     import datetime
     near_field_range = -1
@@ -122,10 +123,11 @@ def NEW_generate_VCP_plot_for_timeslice(ticker, ohlcv_df, vcp_slice):
 
     # subset data
     ohlcv_df_tmp = ohlcv_df.reset_index().copy()
-    data_end_date = datetime.datetime.strptime(current_scan_date, '%Y-%m-%d')
-    subset_ohlcv_df = ohlcv_df_tmp[ohlcv_df_tmp['date'] <= data_end_date]
+    #data_end_date = datetime.datetime.strptime(current_scan_date, '%Y-%m-%d')
+    #subset_ohlcv_df = ohlcv_df_tmp[ohlcv_df_tmp['date'] <= data_end_date]
 
-    fig = set_up_time_series_plot(ticker, subset_ohlcv_df)
+    #fig = set_up_time_series_plot(ticker, subset_ohlcv_df)
+    fig = set_up_time_series_plot(ticker, ohlcv_df_tmp)
 
     merged_contractions = get_contractions_from_vcp_df(vcp_slice)
     if not merged_contractions.empty:

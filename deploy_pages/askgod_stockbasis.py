@@ -50,8 +50,9 @@ def app():
         dt = datetime.datetime(year=selected_date.year, month=selected_date.month,day=selected_date.day)
 
         # step 1 plot historical time series
-        from deploy_pages.vcp_page import set_up_time_series_plot, clean_up_axis
+        #from deploy_pages.vcp_page import set_up_time_series_plot, clean_up_axis
 
+        from utils.vcp_plottings import set_up_time_series_plot, clean_up_axis
         # note we subset datahere.
         # this is not fast enough (need to cache and speed it up
         df_in = df[(df['date'] >= dt-datetime.timedelta(days=500)) & (df['date'] <= dt)]

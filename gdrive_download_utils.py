@@ -51,10 +51,10 @@ def download_file_from_google_drive_sharables(id, destination):
     #URL  =r"https://drive.google.com/uc?/1VA-QE48-5S1GABReSsNZ1fyR1nKsqKSB"
     print("download_file_from_google_drive_sharables:: URL=",URL)
     session = requests.Session()
-
+    import time
     response = session.get(URL, params = { 'id' : id }, stream = True)
     token = get_confirm_token(response)
-
+    time.sleep(3)
     if token:
         params = { 'id' : id, 'confirm' : token }
         response = session.get(URL, params = params, stream = True)
