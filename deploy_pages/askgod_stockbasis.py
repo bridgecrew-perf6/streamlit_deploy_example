@@ -40,7 +40,7 @@ def app():
         ticker = select_ticker()
 
         df = load_time_series_data_refintiv(ticker)
-        st.write(df)
+        #st.write(df)
         default_date = st.session_state.data_as_of_date
         selected_date = st.date_input("Select Date", default_date, min_value = df.iloc[0]['date'], max_value=df.iloc[-1]['date'])
 
