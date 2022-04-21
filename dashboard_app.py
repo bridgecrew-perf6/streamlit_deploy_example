@@ -19,28 +19,6 @@ app = MultiPage()
 
 #########################################
 #########################################
-#SIGNAL_POINTER_FILE = "signal_pointer_file.csv"
-
-
-@st.cache(ttl=3600,allow_output_mutation=True,suppress_st_warning=True,hash_funcs={"_thread.RLock": lambda _: None})
-def download_all_data():
-    try:
-        from streamlit_project_settings import DOWNLOADED_DATA_DIR, SIGNAL_POINTER_FILE_ID, SIGNAL_POINTER_FILE
-        from gdrive_download_utils import download_all_signals, download_file_from_google_drive_sharables
-        st.info('running download all data')
-        st.info('download signal pointer file')
-        download_file_from_google_drive_sharables(SIGNAL_POINTER_FILE_ID, SIGNAL_POINTER_FILE)
-        download_all_signals(SIGNAL_POINTER_FILE, DOWNLOADED_DATA_DIR)
-        download_file_from_google_drive_sharables(r'1I8mC11owGeO51A-dUG55HPuM7WQvj_eZ', 'netflix_titles')
-
-        download_file_from_google_drive_sharables("1wqQdJe7JCTg9xoh9yaYCtI8XJGmENs42", "TIMESERIES.pkl")
-
-        return True
-
-    except Exception as e:
-
-        st.exception(e)
-        return False
 
 import datetime
 @st.cache(ttl=36000,allow_output_mutation=True,suppress_st_warning=True,hash_funcs={"_thread.RLock": lambda _: None})
@@ -64,13 +42,9 @@ def download_all_data_new(snapshot_date = datetime.datetime.now().date()):
         st.exception(e)
         return False
 
-
-# from gdrive_download_utils import download_all_signals, download_file_from_google_drive_sharables
-# from streamlit_project_settings import DOWNLOADED_DATA_DIR, SIGNAL_POINTER_FILE_ID, SIGNAL_POINTER_FILE
-# download_file_from_google_drive_sharables(SIGNAL_POINTER_FILE_ID, SIGNAL_POINTER_FILE)
-# exit()
-print(download_all_data_new())
+# download all data here
 from utils.load_data import prepare_fullframe_vcp_data
+download_all_data_new()
 prepare_fullframe_vcp_data()
 
 if "vcpable_universe" not in st.session_state:
@@ -82,6 +56,16 @@ if "vcpable_universe" not in st.session_state:
 if "ticker_universe" not in st.session_state:
     from utils.load_universe_info import get_time_series_data_refintiv_universe
     st.session_state.ticker_universe = get_time_series_data_refintiv_universe()
+
+# this variable stores where the data is as of
+if "data_as_of_date" not in st.session_state:
+    import pandas as pd
+    from streamlit_project_settings import OHLCV_PICKLE
+    ts_df = pd.read_pickle(OHLCV_PICKLE)
+    st.session_state.data_as_of_date = ts_df.adjclose.index[-1]
+    #st.info(st.session_state)
+
+
 ##########################################
 ##########################################
 
@@ -114,20 +98,5 @@ app.add_page("Recent breakout", recent_breakout.app)
 app.add_page("Momentum lookup",askgod_stockbasis.app)
 app.add_page("VCP setup", new_vcp_page.app)
 
-#app.add_page("Daily VCP scanner",vcp_page.app)
-#app.add_page("page1",test_multipage.app)
-#app.add_page("Ask god",test_multipage2.app)
-#app.add_page("Factor",factor_explorer.app)
-
-
 # The main app
 app.run()
-
-#download_file_from_google_drive_sharables("1wqQdJe7JCTg9xoh9yaYCtI8XJGmENs42", "TIMESERIES.pkl")
-
-#download_file_from_google_drive_sharables(r'1I8mC11owGeO51A-dUG55HPuM7WQvj_eZ', 'netflix_titles')
-#import pickle
-#file_to_read = open("TIMESERIES.pkl", "rb")
-#loaded_object = pickle.load(file_to_read)
-#file_to_read.close()
-#print(loaded_object)

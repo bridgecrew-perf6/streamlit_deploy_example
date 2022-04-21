@@ -35,7 +35,7 @@ def app():
     from utils.load_data import prepare_fullframe_vcp_data
 
     from utils.vcp_utils import build_vcp_summary_table, get_contractions_from_vcp_df, display_contractions_df_grid
-    from utils.vcp_plottings import NEW_generate_VCP_plot_for_timeslice
+    from utils.vcp_plottings import NEW_generate_VCP_plot_for_timeslice, clean_up_axis
 
     vcp_full_frame = prepare_fullframe_vcp_data()
     stockbasis_df = load_STOCKBASIS()
@@ -60,8 +60,6 @@ def app():
 
     with col1:
         fig, near_field = NEW_generate_VCP_plot_for_timeslice(ticker, ohlcv_df, vcp_slice)
-
-        from deploy_pages.vcp_page import clean_up_axis
         fig, clean_up_axis(fig, ticker,str(vcp_slice_dict['datetime']))
         st.plotly_chart(fig, width=1200, height=900)
 
@@ -74,7 +72,7 @@ def app():
         st.write("# VCP info")
         st.write("Footprint:\t" +vcp_df_pretty[vcp_df_pretty["ticker"] == ticker].iloc[0]["footprint"])
         st.write("Total duration:\t",vcp_slice_dict["total_duration"])
-        st.write("N contractions:\t",vcp_slice_dict["number_of_consolidations"])
+        st.write("N contractions:\t", vcp_slice_dict["number_of_consolidations"])
         st.write("Max contraction (%):\t",round(vcp_slice_dict["max_consolidations_pct"]*100,2))
 
         st.write("### VCP status")

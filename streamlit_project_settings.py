@@ -14,3 +14,5 @@ RSSCORE_DF_PATH = os.path.join(DOWNLOADED_DATA_DIR,'RSSCORE.csv')
 SCTRSCORE_DF_PATH = os.path.abspath(os.path.join(DOWNLOADED_DATA_DIR,'SCTRSCORE.csv'))
 MRSQUARE_DF_PATH = os.path.join(DOWNLOADED_DATA_DIR,'MRSQUARE.csv')
 STOCKBASIS_DF_PATH = os.path.join(DOWNLOADED_DATA_DIR,"STOCKBASIS.csv")
+
+#streamlit run C:/Users/tclyu/PycharmProjects/streamlit_deploy_example/dashboard_app.py

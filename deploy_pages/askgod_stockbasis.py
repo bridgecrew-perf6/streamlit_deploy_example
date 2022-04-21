@@ -23,6 +23,7 @@ def select_ticker():
         st.write("KEYWORD LIST IS EMPTY")
     return ticker
 
+
 def app():
     import pandas as pd
     import datetime
@@ -30,8 +31,6 @@ def app():
 
     from utils.load_data import load_STOCKBASIS
     from utils.load_data import load_time_series_data_refintiv
-
-
     stockbasis_df = load_STOCKBASIS()
 
     col1, col2 = st.columns([2.5,1])
@@ -41,8 +40,8 @@ def app():
         ticker = select_ticker()
 
         df = load_time_series_data_refintiv(ticker)
-
-        default_date = datetime.date(day=7,month=4,year=2022)
+        st.write(df)
+        default_date = st.session_state.data_as_of_date
         selected_date = st.date_input("Select Date", default_date, min_value = df.iloc[0]['date'], max_value=df.iloc[-1]['date'])
 
         st.write('Selected date:', selected_date)
@@ -50,11 +49,9 @@ def app():
         dt = datetime.datetime(year=selected_date.year, month=selected_date.month,day=selected_date.day)
 
         # step 1 plot historical time series
-        #from deploy_pages.vcp_page import set_up_time_series_plot, clean_up_axis
-
         from utils.vcp_plottings import set_up_time_series_plot, clean_up_axis
         # note we subset datahere.
-        # this is not fast enough (need to cache and speed it up
+        #todo this is not fast enough (need to cache and speed it up
         df_in = df[(df['date'] >= dt-datetime.timedelta(days=500)) & (df['date'] <= dt)]
         df_in.reset_index(inplace=True)
 

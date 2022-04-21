@@ -84,7 +84,13 @@ def clean_up_axis(fig, ticker, date_str,use_title=True):
         width=1000,
         height=600,
         margin=dict(l=20, r=50, t=30, b=20),
-        title_text=generate_title
+        title_text=generate_title,
+        legend=dict(
+            yanchor="top",
+            y=0.99,
+            xanchor="left",
+            x=0.01
+        )
     )
     fig.update_xaxes(showgrid=True, gridwidth=0.01, gridcolor='Black', automargin=False)
     fig.update_yaxes(showgrid=True, gridwidth=0.01, gridcolor='Black', automargin=False)
