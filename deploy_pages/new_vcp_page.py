@@ -122,7 +122,7 @@ def app():
         st.write("### VCP status")
         st.write("Earliest scanned on :\t",vcp_slice_dict["earliest_vcp_scanned_date"])
         st.write("is breakout latest contraction :\t",vcp_slice_dict["is_break_out_latest_contraction"])
-        st.write("is breakout latest contraction :\t",vcp_slice_dict["is_break_out_first_contraction"])
+        st.write("is breakout first contraction :\t",vcp_slice_dict["is_break_out_first_contraction"])
         st.write("SL :\t",contractions_df.iloc[-1]['support_price'])
         entry_price = vcp_slice_dict['latest_contraction_price']
         st.write("2R :\t", round(entry_price*(1+2*vcp_slice_dict['latest_contraction_pct']),2))

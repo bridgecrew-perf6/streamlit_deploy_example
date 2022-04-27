@@ -1,3 +1,28 @@
+def make_multiselect_summary_table(vcp_df_pretty):
+    from st_aggrid import AgGrid
+    from st_aggrid.shared import GridUpdateMode
+    from st_aggrid.grid_options_builder import GridOptionsBuilder
+
+    gb = GridOptionsBuilder.from_dataframe(vcp_df_pretty)
+    gb.configure_pagination()
+    gb.configure_side_bar()
+    gb.configure_default_column(groupable=True, value=True, enableRowGroup=True, aggFunc="sum", editable=True,
+                                min_column_width=100)
+    gb.configure_selection(selection_mode="multiple", use_checkbox=True,pre_selected_rows=vcp_df_pretty.index.to_list())
+    gridOptions = gb.build()
+
+    selected_data = AgGrid(vcp_df_pretty,
+                           width='1000',
+                           #height=1000,
+                           # theme='dark',
+                           fit_columns_on_grid_load=True,
+                           gridOptions=gridOptions,
+                           enable_enterprise_modules=True,
+                           allow_unsafe_jscode=True,
+                           update_mode=GridUpdateMode.SELECTION_CHANGED)
+    default_ticker = vcp_df_pretty['ticker'][0]
+    return selected_data, default_ticker
+
 def make_summary_table(vcp_df_pretty):
     from st_aggrid import AgGrid
     from st_aggrid.shared import GridUpdateMode

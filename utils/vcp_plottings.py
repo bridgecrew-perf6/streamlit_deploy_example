@@ -40,7 +40,7 @@ def add_contraction_lines(fig, merged_contractions):
 
     horizontal_line_length = 10
     line_width = 2
-    line_colour = "orange"
+    line_colour = "white"
     text_colour = line_colour
     for idx, con_ in merged_contractions.iterrows():
         constraction_start_dt = datetime.datetime.strptime(con_.start_dt_index, '%Y-%m-%d')
@@ -71,7 +71,7 @@ def add_contraction_lines(fig, merged_contractions):
                       y1=con_.support_price, line_width=line_width, line_color=line_colour)
     return fig
 
-def clean_up_axis(fig, ticker, date_str,use_title=True):
+def clean_up_axis(fig, ticker, date_str,use_title=True,range_slide_on=True):
     if use_title:
         generate_title = "TICKER=" + ticker + ",DATE=" + date_str  # + ",volume_slope=" + str(
     else:
@@ -94,7 +94,7 @@ def clean_up_axis(fig, ticker, date_str,use_title=True):
     )
     fig.update_xaxes(showgrid=True, gridwidth=0.01, gridcolor='Black', automargin=False)
     fig.update_yaxes(showgrid=True, gridwidth=0.01, gridcolor='Black', automargin=False)
-    fig.update(layout_xaxis_rangeslider_visible=True)
+    fig.update(layout_xaxis_rangeslider_visible=range_slide_on)
     return fig
 
 def get_contractions_from_vcp_df(vcp_slice):
@@ -142,3 +142,4 @@ def NEW_generate_VCP_plot_for_timeslice(ticker, ohlcv_df, vcp_slice):
     fig, clean_up_axis(fig, ticker, current_scan_date)
     # return volume_slope, contraction_slope, merged_contractions, near_field_range
     return fig, near_field_range
+

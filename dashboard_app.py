@@ -92,8 +92,8 @@ def strink_sidebar():
 #Add all your application here
 # from dashboard_pages import test_multipage, test_multipage2, test_multipage3, factor_explorer, vcp_page, test_timeseries
 #from deploy_pages import askgod, vcp_page, askgod_stockbasis
-from deploy_pages import  askgod_stockbasis ,new_vcp_page, recent_breakout
-
+from deploy_pages import  askgod_stockbasis ,new_vcp_page, recent_breakout, generate_report_gui
+app.add_page("Report GUI", generate_report_gui.app)
 app.add_page("Recent breakout", recent_breakout.app)
 app.add_page("Momentum lookup",askgod_stockbasis.app)
 app.add_page("VCP setup", new_vcp_page.app)
