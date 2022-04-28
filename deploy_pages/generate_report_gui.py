@@ -27,24 +27,19 @@ def app():
     from utils.load_data import prepare_fullframe_vcp_data
 
     from utils.vcp_utils import make_multiselect_summary_table
+    import shutil
 
     vcp_full_frame = prepare_fullframe_vcp_data()
 
     vcp_df_pretty = in_house_filter_vcp_df(vcp_full_frame)
     data, default_ticker = make_multiselect_summary_table(vcp_df_pretty)
 
-    tmp_export_dir = "tmp_dir_" + str(datetime.datetime.today().date())
-    st.info(tmp_export_dir)
+
+    data_export_dir = "report_data_export_" + str(datetime.datetime.today().date())
+    st.info(data_export_dir)
+
     if st.button('Click to generate report'):
-        from fpdf import FPDF
-        pdf = FPDF(orientation='P', unit='mm', format='letter')
-        pdf.add_page()
-        #pdf.set_font("Courier", "B", 16)
-        #from pdf_report_generator.gen_page import setup_titlepage, make_table
-        #from fpdf import FPDF
-        #pdf = setup_titlepage()
-        ########################### build title page ##################
-        from pdf_report_generator.gen_page import make_table
+
         selected_df = pd.DataFrame(data['selected_rows'])[['ticker','total_duration','contraction_ratio','number_of_consolidations']]
         selected_df['contraction_ratio'] = selected_df['contraction_ratio'].round(2)
         selected_df = selected_df.rename(columns={"number_of_consolidations":"N",
@@ -52,30 +47,56 @@ def app():
                                                   "contraction_ratio":"contraction ratio"})
         selected_df['page'] = list(range(2, selected_df.shape[0]+2))
         st.dataframe(selected_df)
+
+
+        ########################### build title page for FPDF ##################
+        from pdf_report_generator.gen_page import make_table
+
+        from fpdf import FPDF
+        pdf = FPDF(orientation='P', unit='mm', format='letter')
+        pdf.add_page()
         pdf.ln(10)
         make_table(pdf, selected_df,size=12)
         pdf.set_y(-20)
-        #pdf.cell(0, 5, "Information containing any historical information, data or analysis should not be taken as an indication or guarantee of any future performance, analysis, forecast or prediction. Past performance does not guarantee future results", 0, 'C')
-        ################################################################
+        #########################################################################
+        # we need to export data when we're want to make powerpoint presentation
+
+        if os.path.exists(data_export_dir):
+            st.info("removing data_export_dir :: " + data_export_dir)
+            if os.path.exists(data_export_dir):
+                shutil.rmtree(data_export_dir, ignore_errors=False, onerror=None)
+
+        from pathlib import Path
+        Path(data_export_dir).mkdir(exist_ok=True)
+        selected_df.to_pickle(os.path.join(data_export_dir, "SELECTEDSUMMARY"+'_selected_df.pkl'))
 
         for data_row in data['selected_rows']:
-            vcp_slice = pd.DataFrame(data_row,index=[0])
+            vcp_slice = pd.DataFrame(data_row, index=[0])
             from pdf_report_generator.report_utils.vcp_report_funs import make_plots
             from pdf_report_generator.gen_page import build_page
-
             ticker = vcp_slice['ticker'][0]
             st.write(ticker)
             ohlcv_df = load_time_series_data_refintiv(ticker)
-            stockinfo_df, vcp_property_df, vcp_supplementary_df, factors_df, contractions_df, ts_plot_path = make_plots(ticker, vcp_slice, ohlcv_df, tmp_export_dir)
+            stockinfo_df, vcp_property_df, vcp_supplementary_df, factors_df, contractions_df, ts_plot_path = make_plots(
+                ticker, vcp_slice, ohlcv_df, data_export_dir)
+
             st.image(ts_plot_path,width=800)
+
+            stockinfo_df.to_pickle(os.path.join(data_export_dir, ticker+'_stockinfo_df.pkl'))
+            vcp_property_df.to_pickle(os.path.join(data_export_dir, ticker+'_vcp_property_df.pkl'))
+            vcp_supplementary_df.to_pickle(os.path.join(data_export_dir, ticker+'_vcp_supplementary_df.pkl'))
+            factors_df.to_pickle(os.path.join(data_export_dir, ticker +'_factors_df.pkl'))
+            contractions_df.to_pickle(os.path.join(data_export_dir, ticker +'_contractions_df.pkl'))
+            #shutil.copyfile(ts_plot_path, os.path.join(data_export_dir,os.path.basename(ts_plot_path)))
             pdf = build_page(pdf, ticker, ts_plot_path, stockinfo_df, vcp_property_df, vcp_supplementary_df, factors_df, contractions_df)
 
-        import datetime
+        st.info("Selected data stored in: " + os.path.abspath(data_export_dir))
+
         export_filename = "vcp_report_"+str(datetime.datetime.today().date())+".pdf"
         pdf.output(export_filename)
         with open(export_filename,"rb") as file:
             btn = st.download_button(
-                "Download Report",
+                "Download FPDF Report",
                 data=file.read(),
                 file_name=export_filename,
                 mime='application/octet-stream'
@@ -83,6 +104,22 @@ def app():
 
     if st.button('Click to clear tmp directory'):
         import shutil
-        st.info("removing tmp_dir :: " + tmp_export_dir)
-        if os.path.exists(tmp_export_dir):
-            shutil.rmtree(tmp_export_dir, ignore_errors=False, onerror=None)
+        st.info("removing tmp_dir :: " + data_export_dir)
+        if os.path.exists(data_export_dir):
+            shutil.rmtree(data_export_dir, ignore_errors=False, onerror=None)
+
+    #if st.button('Click to zip and download directory'):
+    #import shutil
+    if os.path.exists(data_export_dir):
+        o_name = os.path.basename(data_export_dir)+'.zip'
+        shutil.make_archive(os.path.basename(data_export_dir), 'zip', data_export_dir)
+        with open(o_name, "rb") as fp:
+            btn = st.download_button(
+                label="Download ZIP",
+                data=fp,
+                file_name=o_name,
+                mime="application/zip"
+            )
+
+        st.info("call main in make_pdf.py to make powerpoint->pdf")
+        st.info("input args in make_df dir= " + os.path.abspath(data_export_dir))
