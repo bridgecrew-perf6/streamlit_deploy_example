@@ -14,9 +14,19 @@ def fill_title_page_date():
     for shape in slide.shapes:
         if shape.name == 'date_slot': # this refers to the date
             text_frame = shape.text_frame
-            import tzlocal
-            now = datetime.now(tzlocal.get_localzone())
-            text_frame.text = str(now)
+            #import tzlocal
+            import pytz
+            from datetime import datetime as dt_
+            now = str(dt_.now(pytz.timezone("US/Pacific")).strftime('%Y-%m-%d %H:%M:%S %z'))
+            #now = datetime.now(tzlocal.get_localzone())
+            #text_frame.text = str(now)
+            p = text_frame.paragraphs[0]
+            run = p.add_run()
+            run.text =  str(now)
+            font = run.font
+            from pptx.dml.color import RGBColor
+            font.color.rgb = RGBColor(255, 255, 255)
+
     return prs
 
 def fill_table(df, table):
@@ -140,6 +150,7 @@ def build_content_page(selected_df):
 
 def build_pdf_report_from_dir(dir, output_pdf_path, ppt_export_dir = "tmp_ppt_export", is_cleanup=True):
     import os
+    """
     def get_tickers(dir):
         import os
         tickers = []
@@ -152,8 +163,8 @@ def build_pdf_report_from_dir(dir, output_pdf_path, ppt_export_dir = "tmp_ppt_ex
                 tickers.append(tmp_filename.split('_')[0])
         tickers = sorted(list(set(tickers)))
         return tickers
-
     ticker_list = get_tickers(dir)
+    """
 
     ppt_export_dir = os.path.abspath(ppt_export_dir)
     if os.path.exists(ppt_export_dir):
@@ -167,7 +178,6 @@ def build_pdf_report_from_dir(dir, output_pdf_path, ppt_export_dir = "tmp_ppt_ex
     Path(ppt_export_dir).mkdir(exist_ok=True)
     from pdf_report_generator.powerpoint_report_gen_utils.utils import PPTtoPDF, merge_pdfs
 
-    page_number = 2
     pdfs_to_combine = []
 
     ######### title page #######
@@ -187,7 +197,10 @@ def build_pdf_report_from_dir(dir, output_pdf_path, ppt_export_dir = "tmp_ppt_ex
     PPTtoPDF(inputFileName, outputFileName, formatType=32)
     pdfs_to_combine.append(os.path.abspath((outputFileName)))
 
-    for ticker in ticker_list:
+    for idx, row in selected_df.iterrows():
+        ticker = row.ticker
+        page_number = row.page
+
         time_series_png_path = os.path.join(dir, ticker + '.png')
         vcp_property_df = pd.read_pickle(os.path.join(dir, ticker + "_vcp_property_df.pkl"))
         stockinfo_df = pd.read_pickle(os.path.join(dir, ticker + "_stockinfo_df.pkl"))
@@ -205,7 +218,6 @@ def build_pdf_report_from_dir(dir, output_pdf_path, ppt_export_dir = "tmp_ppt_ex
         PPTtoPDF(inputFileName, outputFileName, formatType=32)
         print("build_pdf_report_from_dir::converted ppt to pdf=",outputFileName)
         pdfs_to_combine.append(os.path.abspath((outputFileName)))
-        page_number += 1
 
     merge_pdfs(pdfs_to_combine, output_pdf_path)
 
@@ -217,3 +229,14 @@ def build_pdf_report_from_dir(dir, output_pdf_path, ppt_export_dir = "tmp_ppt_ex
     print("build_pdf_report_from_dir:: output= "+os.path.abspath(output_pdf_path))
 
     return output_pdf_path
+
+if __name__ == "____":
+    import pandas as pd
+    dir=r"C:\Users\tclyu\PycharmProjects\streamlit_deploy_example\report_data_export_2022-04-28"
+    import os
+    df = pd.read_pickle(os.path.join(dir,"SELECTEDSUMMARY_selected_df.pkl"))
+    print(df)
+if __name__ == "__main__":
+
+    prs = fill_title_page_date()
+    prs.save('tmp.pptx')

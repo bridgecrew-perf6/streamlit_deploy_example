@@ -56,7 +56,7 @@ def load_vcp_df(snapshot_date = datetime.datetime.now().date()):
     import pandas as pd
     from streamlit_project_settings import VCP_DF_PATH
     vcp_df = pd.read_csv(VCP_DF_PATH)
-    vcp_df = vcp_df.drop(['RSSCORE', 'SCTRSCORE', 'MRSQUARE'], axis=1, errors='ignore')
+    vcp_df = vcp_df.drop(['MM_Stage2Filtered','RSSCORE', 'SCTRSCORE', 'MRSQUARE'], axis=1, errors='ignore')
 
     return vcp_df
 
@@ -104,4 +104,5 @@ def prepare_fullframe_vcp_data():
     vcp_df = load_vcp_df()
     stockbasis_df = load_STOCKBASIS()
     vcp_df_full = vcp_df.join(stockbasis_df,on=['ticker'],how='inner')
+    vcp_df_full = vcp_df_full.drop('Unnamed: 0',axis=1,errors ='ignore')
     return vcp_df_full

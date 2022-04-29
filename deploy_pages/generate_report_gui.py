@@ -1,5 +1,6 @@
-# we want filter vcp to make sense before VCPs before displaying
-def in_house_filter_vcp_df(vcp_df):
+
+def find_default_vcps(vcp_df):
+    # this finds a subdataframe that has been breakout from all contractions
     inhouse_filtered_vcp_df = vcp_df.copy(deep=True)
     inhouse_filtered_vcp_df = inhouse_filtered_vcp_df[(inhouse_filtered_vcp_df['total_duration']>30) &\
         (inhouse_filtered_vcp_df['first_contraction_pct'] >= 0.15) & (inhouse_filtered_vcp_df['first_contraction_pct'] <= 0.45)  &\
@@ -7,10 +8,12 @@ def in_house_filter_vcp_df(vcp_df):
     (inhouse_filtered_vcp_df['RSSCORE'] >= 60) &\
     (inhouse_filtered_vcp_df['SCTRSCORE'] >= 60) &\
     (inhouse_filtered_vcp_df['MRSQUARE'] >= 60) &\
-    (inhouse_filtered_vcp_df['SW_stage2']==True) & \
-    (inhouse_filtered_vcp_df['volume_contraction_condition']) & (inhouse_filtered_vcp_df['latest_contraction_price'] >= 10) & \
-    (inhouse_filtered_vcp_df['is_break_out_latest_contraction'] >= True)  & \
-        (inhouse_filtered_vcp_df['is_break_out_first_contraction'] >= True)]
+    (inhouse_filtered_vcp_df['SW_stage2']==True) &  \
+    (inhouse_filtered_vcp_df['MM_Stage2Filtered']==True) &\
+    (inhouse_filtered_vcp_df['latest_contraction_price'] >= 10)
+    ]#& \
+    #(inhouse_filtered_vcp_df['is_break_out_latest_contraction'] >= True)  & \
+    #    (inhouse_filtered_vcp_df['is_break_out_first_contraction'] >= True)]
 
     inhouse_filtered_vcp_df = inhouse_filtered_vcp_df.drop('Unnamed: 0',axis=1,errors ='ignore')
 
@@ -30,12 +33,19 @@ def app():
     import shutil
 
     vcp_full_frame = prepare_fullframe_vcp_data()
+    default_vcp_df = find_default_vcps(vcp_full_frame)
+    vcp_full_frame_ex_defaults = vcp_full_frame[~vcp_full_frame['ticker'].isin(default_vcp_df['ticker'].to_list())]
+    vcp_df_to_show = pd.concat([default_vcp_df, vcp_full_frame_ex_defaults], ignore_index=True)
+    vcp_df_to_show = vcp_df_to_show.reset_index(drop=True)
 
-    vcp_df_pretty = in_house_filter_vcp_df(vcp_full_frame)
-    data, default_ticker = make_multiselect_summary_table(vcp_df_pretty)
-
+    default_selections = default_vcp_df.index.to_list()
+    #st.write(vcp_df_to_show)
+    #st.write(default_vcp_df.index)
+    #st.info(default_selections)
+    data, default_ticker = make_multiselect_summary_table(vcp_df_to_show, default_selections)
 
     data_export_dir = "report_data_export_" + str(datetime.datetime.today().date())
+
     st.info(data_export_dir)
 
     if st.button('Click to generate report'):

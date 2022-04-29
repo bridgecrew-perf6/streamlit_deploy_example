@@ -30,3 +30,5 @@ DROPBOX_USER_PATH = personal_settings.DROPBOX_USER_PATH #r"C:\Users\tclyu\Dropbo
 DROPBOX_PATH = os.path.join(DROPBOX_USER_PATH, r"thomas_home\active_portfolio_management")
 HARDCOREVCP_HOME = os.path.join(DROPBOX_PATH,"HARDCOREVCP")
 REPORT_OUTPUT_DIR = os.path.join(HARDCOREVCP_HOME,r"digital_products\reports")
+
+#streamlit run C:/Users/tclyu/PycharmProjects/streamlit_deploy_example/dashboard_app.py

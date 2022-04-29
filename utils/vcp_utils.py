@@ -1,4 +1,4 @@
-def make_multiselect_summary_table(vcp_df_pretty):
+def make_multiselect_summary_table(vcp_df_pretty, default_selections_rows):
     from st_aggrid import AgGrid
     from st_aggrid.shared import GridUpdateMode
     from st_aggrid.grid_options_builder import GridOptionsBuilder
@@ -8,12 +8,12 @@ def make_multiselect_summary_table(vcp_df_pretty):
     gb.configure_side_bar()
     gb.configure_default_column(groupable=True, value=True, enableRowGroup=True, aggFunc="sum", editable=True,
                                 min_column_width=100)
-    gb.configure_selection(selection_mode="multiple", use_checkbox=True,pre_selected_rows=vcp_df_pretty.index.to_list())
+    gb.configure_selection(selection_mode="multiple", use_checkbox=True, pre_selected_rows=default_selections_rows)
     gridOptions = gb.build()
 
     selected_data = AgGrid(vcp_df_pretty,
                            width='1000',
-                           #height=1000,
+                           height=1000,
                            # theme='dark',
                            fit_columns_on_grid_load=True,
                            gridOptions=gridOptions,
